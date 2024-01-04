@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">News</string>
+    <string name="source_with_published_time">%s %s %s - %s</string>
+</resources>
