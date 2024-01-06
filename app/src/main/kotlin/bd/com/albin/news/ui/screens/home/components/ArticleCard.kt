@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,18 +12,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,6 +43,7 @@ import bd.com.albin.news.data.local.entities.Source
 import bd.com.albin.news.data.model.Article
 import bd.com.albin.news.ui.common.composable.ErrorScreen
 import bd.com.albin.news.ui.common.composable.LoadingScreen
+import bd.com.albin.news.ui.common.ext.ensureHttpsUrl
 import bd.com.albin.news.ui.common.ext.shimmerEffect
 import bd.com.albin.news.ui.theme.NewsTheme
 import coil.compose.AsyncImage
@@ -42,7 +51,7 @@ import kotlinx.datetime.Instant
 import java.util.concurrent.TimeUnit
 
 @Composable
-fun SourceAndPublishTime(
+fun PublishTime(
     article: Article, modifier: Modifier = Modifier
 ) {
 
@@ -50,21 +59,21 @@ fun SourceAndPublishTime(
         System.currentTimeMillis() - Instant.parse(article.publishedAt).toEpochMilliseconds(),
         TimeUnit.MILLISECONDS
     )
-    var timeUnit = "minute"
+    var timeUnit = stringResource(R.string.minute)
     if (timeValue >= 60) {
         timeValue /= 60
-        timeUnit = "hour"
+        if (timeValue >= 24) {
+            timeValue /= 24
+            timeUnit = stringResource(R.string.day)
+        } else timeUnit = stringResource(R.string.hour)
     }
-    if (timeUnit == "hour" && timeValue >= 24) {
-        timeValue /= 24
-        timeUnit = "day"
-    }
+
     if (timeValue > 1) timeUnit += "s"
 
     Row(modifier) {
         Text(
-            text = "$timeValue $timeUnit ago - " + article.source.name,
-            style = MaterialTheme.typography.bodyMedium
+            text = stringResource(R.string.publish_time, timeValue, timeUnit),
+            style = MaterialTheme.typography.labelMedium
         )
     }
 }
@@ -72,9 +81,10 @@ fun SourceAndPublishTime(
 @Composable
 fun ArticleImage(article: Article, modifier: Modifier = Modifier) {
     AsyncImage(
-        model = article.urlToImage,
+        model = article.urlToImage?.ensureHttpsUrl(),
         contentDescription = null,
         placeholder = painterResource(id = R.drawable.newspaper),
+        error = painterResource(id = R.drawable.newspaper),
         modifier = modifier
             .size(80.dp)
             .clip(MaterialTheme.shapes.medium),
@@ -84,13 +94,40 @@ fun ArticleImage(article: Article, modifier: Modifier = Modifier) {
 
 @Composable
 fun ArticleTitle(article: Article, modifier: Modifier = Modifier) {
-    Text(
-        text = article.title,
-        style = MaterialTheme.typography.titleMedium,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis,
+    Column(modifier = modifier) {
+        Text(
+            text = article.source.name.uppercase(), style = TextStyle(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary
+                    )
+                )), fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = article.title,
+            style = MaterialTheme.typography.titleLarge,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+fun BookmarkButton(
+    isBookmarked: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    IconToggleButton(
+        checked = isBookmarked,
+        onCheckedChange = { onClick() },
         modifier = modifier
-    )
+    ) {
+        Icon(
+            imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+            contentDescription = null
+        )
+    }
 }
 
 @Composable
@@ -113,8 +150,8 @@ fun ArticleCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            SourceAndPublishTime(article)
-            Spacer(modifier = Modifier.weight(1f))
+            PublishTime(article)
+//            BookmarkButton(isBookmarked = false, onClick = { /*TODO*/ })
         }
     }
 }

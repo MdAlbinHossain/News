@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">News</string>
-    <string name="source_with_published_time">%s %s %s - %s</string>
+    <string name="publish_time">"%s %s ago"</string>
+    <string name="minute">minute</string>
+    <string name="hour">hour</string>
+    <string name="day">day</string>
+    <string name="view_original_source">View Original Source</string>
 </resources>

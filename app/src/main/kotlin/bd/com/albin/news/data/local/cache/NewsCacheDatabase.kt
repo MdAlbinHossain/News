@@ -1,12 +1,12 @@
-package bd.com.albin.news.data.local
+package bd.com.albin.news.data.local.cache
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import bd.com.albin.news.data.local.entities.ArticleEntity
 
 @Database(entities = [ArticleEntity::class], version = 2, exportSchema = false)
-abstract class NewsDatabase : RoomDatabase() {
+abstract class NewsCacheDatabase : RoomDatabase() {
 
-    abstract val articleDao: ArticleDao
+    abstract val articleCacheDao: ArticleCacheDao
 
 }

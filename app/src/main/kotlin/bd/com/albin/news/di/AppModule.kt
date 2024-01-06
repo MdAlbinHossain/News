@@ -6,12 +6,12 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import bd.com.albin.news.BuildConfig
-import bd.com.albin.news.data.local.NewsDatabase
+import bd.com.albin.news.data.local.cache.NewsCacheDatabase
 import bd.com.albin.news.data.network.NewsApiService
-import bd.com.albin.news.data.repository.user.UserDataRepositoryImpl
 import bd.com.albin.news.data.repository.news.NewsRepository
 import bd.com.albin.news.data.repository.news.NewsRepositoryImpl
 import bd.com.albin.news.data.repository.user.UserDataRepository
+import bd.com.albin.news.data.repository.user.UserDataRepositoryImpl
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -50,14 +50,16 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providesNewsDatabase(@ApplicationContext context: Context): NewsDatabase =
+    fun providesNewsCacheDatabase(@ApplicationContext context: Context): NewsCacheDatabase =
         Room.databaseBuilder(
-            context = context, klass = NewsDatabase::class.java, name = "news_db"
+            context = context, klass = NewsCacheDatabase::class.java, name = "news_cache_db"
         ).fallbackToDestructiveMigration().build()
 
     @Provides
     @Singleton
     fun providesNewsRepository(
-        newsApiService: NewsApiService, newsDatabase: NewsDatabase
-    ): NewsRepository = NewsRepositoryImpl(newsApiService, newsDatabase)
+        newsApiService: NewsApiService,
+        newsCacheDatabase: NewsCacheDatabase,
+    ): NewsRepository =
+        NewsRepositoryImpl(newsApiService, newsCacheDatabase)
 }

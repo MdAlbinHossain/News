@@ -8,6 +8,6 @@ import javax.inject.Inject
 
 class GetNewsUseCase @Inject constructor(private val newsRepository: NewsRepository) {
     operator fun invoke(query: String): Flow<PagingData<NetworkArticle>> {
-        return newsRepository.getNews(query)
+        return newsRepository.searchNews(query)
     }
 }

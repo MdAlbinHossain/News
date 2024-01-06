@@ -14,10 +14,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import bd.com.albin.news.ui.NewsAppState
-import bd.com.albin.news.ui.screens.article.ArticleDetailsScreen
 import bd.com.albin.news.ui.common.ext.decodeUrl
 import bd.com.albin.news.ui.common.ext.encodeUrl
-import bd.com.albin.news.ui.common.ext.ensureHttpsUrl
+import bd.com.albin.news.ui.screens.article.ArticleDetailsScreen
 import bd.com.albin.news.ui.screens.home.HomeScreen
 import bd.com.albin.news.ui.screens.onboarding.OnboardingScreen
 import bd.com.albin.news.ui.screens.onboarding.OnboardingViewModel
@@ -53,7 +52,9 @@ fun NewsNavHost(
             })
         ) { backStackEntry ->
             backStackEntry.arguments?.getString(NewsDestination.Article.URL_ARG)?.let {
-                ArticleDetailsScreen(it.decodeUrl().ensureHttpsUrl(), appState::popUp)
+                ArticleDetailsScreen(
+                    it.decodeUrl(),appState::popUp
+                )
             }
         }
         composable(route = NewsDestination.Search.route, enterTransition = {

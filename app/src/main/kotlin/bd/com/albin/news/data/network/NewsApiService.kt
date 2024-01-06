@@ -9,7 +9,7 @@ interface NewsApiService {
 
     @GET("top-headlines")
     suspend fun getTopHeadlines(
-        @Query("apiKey") apiKey: String = BuildConfig.API_KEY,
+        @Query("apiKey") apiKey: String = BuildConfig.API_KEY0,
         @Query("country") country: String? = "us",
         @Query("category") category: String? = null,
         @Query("page") page: Int = 1,
@@ -18,7 +18,7 @@ interface NewsApiService {
 
     @GET("everything")
     suspend fun getNews(
-        @Query("apiKey") apiKey: String = BuildConfig.API_KEY,
+        @Query("apiKey") apiKey: String = BuildConfig.API_KEY0,
         @Query("q") query: String = "",
         @Query("page") page: Int = 1,
         @Query("pageSize") pageSize: Int = 100,

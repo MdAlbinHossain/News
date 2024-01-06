@@ -12,7 +12,9 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(getTopHeadlinesUseCase: GetTopHeadlinesUseCase) : ViewModel() {
+class HomeViewModel @Inject constructor(
+    getTopHeadlinesUseCase: GetTopHeadlinesUseCase,
+) : ViewModel() {
     val uiState = getTopHeadlinesUseCase().map {
         it.map(ArticleEntity::asExternalModel)
     }.cachedIn(viewModelScope)

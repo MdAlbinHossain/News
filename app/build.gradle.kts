@@ -30,7 +30,11 @@ android {
         val keystoreProperties = Properties()
         keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
-        buildConfigField("String", "API_KEY", keystoreProperties.getProperty("apiKey", ""))
+        buildConfigField("String", "API_KEY0", keystoreProperties.getProperty("apiKey0", ""))
+        buildConfigField("String", "API_KEY1", keystoreProperties.getProperty("apiKey1", ""))
+        buildConfigField("String", "API_KEY2", keystoreProperties.getProperty("apiKey2", ""))
+        buildConfigField("String", "API_KEY3", keystoreProperties.getProperty("apiKey3", ""))
+        buildConfigField("String", "API_KEY4", keystoreProperties.getProperty("apiKey4", ""))
         buildConfigField("String", "BASE_URL", keystoreProperties.getProperty("baseUrl", ""))
     }
 
@@ -87,7 +91,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.lifecycle.viewModelCompose)
 
-    implementation (libs.androidx.material.android)
+    implementation(libs.androidx.material.android)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.material3.windowSizeClass)
 

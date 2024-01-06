@@ -5,7 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import bd.com.albin.news.data.local.NewsDatabase
+import bd.com.albin.news.data.local.cache.NewsCacheDatabase
 import bd.com.albin.news.data.local.entities.ArticleEntity
 import bd.com.albin.news.data.network.models.NetworkArticle
 import bd.com.albin.news.data.network.models.asEntity
@@ -16,7 +16,7 @@ import kotlin.math.min
 
 @OptIn(ExperimentalPagingApi::class)
 class NewsHeadlineRemoteMediator(
-    private val newsDatabase: NewsDatabase, private val newsApiService: NewsApiService
+    private val newsCacheDatabase: NewsCacheDatabase, private val newsApiService: NewsApiService
 ) : RemoteMediator<Int, ArticleEntity>() {
     private var articleCounter = 0
     override suspend fun load(
@@ -32,27 +32,27 @@ class NewsHeadlineRemoteMediator(
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
 
                 LoadType.APPEND -> {
-                    newsDatabase.withTransaction {
-                        articleCounter = newsDatabase.articleDao.getTotalCount() ?: 0
+                    newsCacheDatabase.withTransaction {
+                        articleCounter = newsCacheDatabase.articleCacheDao.getTotalCount() ?: 0
                     }
                     (articleCounter / state.config.pageSize) + 1
                 }
             }
 
-            val response = newsApiService.getTopHeadlines(
+            val response = newsApiService.getTopHeadlines(apiKey = apiKeys.random(),
                 page = loadKey, pageSize = state.config.pageSize
             )
 
             val articles = response.articles.distinctBy { it.title }
 
 
-            newsDatabase.withTransaction {
+            newsCacheDatabase.withTransaction {
                 if (loadType == LoadType.REFRESH) {
-                    newsDatabase.articleDao.clearAll()
+                    newsCacheDatabase.articleCacheDao.clearAll()
                 }
 
                 articleCounter += articles.size
-                newsDatabase.articleDao.insertAll(articles.map(NetworkArticle::asEntity))
+                newsCacheDatabase.articleCacheDao.insertAll(articles.map(NetworkArticle::asEntity))
             }
 
             MediatorResult.Success(
@@ -69,8 +69,8 @@ class NewsHeadlineRemoteMediator(
 
     override suspend fun initialize(): InitializeAction {
         val cacheTimeout = TimeUnit.MILLISECONDS.convert(1, TimeUnit.HOURS)
-        val lastUpdated = newsDatabase.withTransaction {
-            newsDatabase.articleDao.getAnyOneItem()?.timestamp ?: 0L
+        val lastUpdated = newsCacheDatabase.withTransaction {
+            newsCacheDatabase.articleCacheDao.getAnyOneItem()?.timestamp ?: 0L
         }
         return if (System.currentTimeMillis() - lastUpdated <= cacheTimeout) {
             InitializeAction.SKIP_INITIAL_REFRESH

@@ -5,7 +5,7 @@ import androidx.paging.PagingState
 import bd.com.albin.news.data.network.models.NetworkArticle
 import kotlin.math.min
 
-class NewsPagingSource(private val newsApiService: NewsApiService, private val query: String) :
+class NewsSearchPagingSource(private val newsApiService: NewsApiService, private val query: String) :
     PagingSource<Int, NetworkArticle>() {
     override fun getRefreshKey(state: PagingState<Int, NetworkArticle>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
@@ -19,7 +19,7 @@ class NewsPagingSource(private val newsApiService: NewsApiService, private val q
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, NetworkArticle> {
         val page = params.key ?: 1
         return try {
-            val newsResponse = newsApiService.getNews(query = query, page = page)
+            val newsResponse = newsApiService.getNews(apiKey = apiKeys.random(),query = query, page = page)
             totalNewsCount += newsResponse.articles.size
 
             val articles = newsResponse.articles.distinctBy { it.title }
