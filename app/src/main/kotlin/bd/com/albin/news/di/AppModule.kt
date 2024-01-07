@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import bd.com.albin.news.BuildConfig
 import bd.com.albin.news.data.local.cache.NewsCacheDatabase
+import bd.com.albin.news.data.local.saved.SavedArticleDatabase
 import bd.com.albin.news.data.network.NewsApiService
 import bd.com.albin.news.data.repository.news.NewsRepository
 import bd.com.albin.news.data.repository.news.NewsRepositoryImpl
@@ -57,9 +58,17 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun providesSavedArticleDatabase(@ApplicationContext context: Context): SavedArticleDatabase =
+        Room.databaseBuilder(
+            context = context, klass = SavedArticleDatabase::class.java, name = "saved_article_db"
+        ).fallbackToDestructiveMigration().build()
+
+    @Provides
+    @Singleton
     fun providesNewsRepository(
         newsApiService: NewsApiService,
         newsCacheDatabase: NewsCacheDatabase,
+        savedArticleDatabase: SavedArticleDatabase
     ): NewsRepository =
-        NewsRepositoryImpl(newsApiService, newsCacheDatabase)
+        NewsRepositoryImpl(newsApiService, newsCacheDatabase, savedArticleDatabase.savedArticleDao)
 }

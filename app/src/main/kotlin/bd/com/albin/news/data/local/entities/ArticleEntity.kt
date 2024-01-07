@@ -8,11 +8,12 @@ import bd.com.albin.news.data.model.Article
 
 @Entity
 data class ArticleEntity(
+    @PrimaryKey @ColumnInfo(name = "url_id") val urlId: String,
     @Embedded val source: Source,
     val author: String?,
     val title: String,
     val description: String?,
-    @PrimaryKey val url: String,
+    val url: String,
     @ColumnInfo(name = "url_to_image") val urlToImage: String?,
     @ColumnInfo(name = "published_at") val publishedAt: String,
     val content: String = "",
@@ -20,6 +21,7 @@ data class ArticleEntity(
 )
 
 fun ArticleEntity.asExternalModel() = Article(
+    id = urlId,
     source = source,
     author = author,
     title = title,

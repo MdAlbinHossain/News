@@ -30,11 +30,10 @@ android {
         val keystoreProperties = Properties()
         keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
-        buildConfigField("String", "API_KEY0", keystoreProperties.getProperty("apiKey0", ""))
-        buildConfigField("String", "API_KEY1", keystoreProperties.getProperty("apiKey1", ""))
-        buildConfigField("String", "API_KEY2", keystoreProperties.getProperty("apiKey2", ""))
-        buildConfigField("String", "API_KEY3", keystoreProperties.getProperty("apiKey3", ""))
-        buildConfigField("String", "API_KEY4", keystoreProperties.getProperty("apiKey4", ""))
+        listOf("API_KEY_0", "API_KEY_1", "API_KEY_2", "API_KEY_3", "API_KEY_4").onEach {
+            buildConfigField("String", it, keystoreProperties.getProperty(it, ""))
+        }
+
         buildConfigField("String", "BASE_URL", keystoreProperties.getProperty("baseUrl", ""))
     }
 

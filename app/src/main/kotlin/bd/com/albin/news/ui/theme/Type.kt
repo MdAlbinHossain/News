@@ -28,10 +28,5 @@ val Typography = Typography(
         fontFamily = SourceCodePro,
     ), titleMedium = TextStyle(
         fontFamily = NunitoSans,
-    ), labelSmall = TextStyle(
-        fontFamily = SourceCodePro,
-    ), labelMedium = TextStyle(
-        fontFamily = SourceCodePro,
-        fontWeight = FontWeight.Bold
     )
 )

@@ -9,5 +9,14 @@ import kotlinx.coroutines.flow.Flow
 interface NewsRepository {
     fun getTopHeadlines(): Flow<PagingData<ArticleEntity>>
 
+    fun getSavedNews(): Flow<PagingData<ArticleEntity>>
+
     fun searchNews(query: String): Flow<PagingData<NetworkArticle>>
+
+    suspend fun getArticle(urlId: String): ArticleEntity
+
+    suspend fun saveArticle(article: ArticleEntity)
+    fun deleteArticle(article: ArticleEntity)
+
+    fun getArticleIds(): Flow<List<String>>
 }

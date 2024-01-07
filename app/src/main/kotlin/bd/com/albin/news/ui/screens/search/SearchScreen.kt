@@ -15,6 +15,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.paging.compose.collectAsLazyPagingItems
+import bd.com.albin.news.data.local.entities.ArticleEntity
 import bd.com.albin.news.ui.screens.home.components.ArticleList
 import bd.com.albin.news.ui.theme.NewsTheme
 
@@ -22,6 +23,9 @@ import bd.com.albin.news.ui.theme.NewsTheme
 @Composable
 fun SearchScreen(
     uiState: SearchUiState,
+    savedArticleIds: Set<String>,
+    onSaveArticle: (ArticleEntity) -> Unit,
+    onDeleteArticle: (ArticleEntity) -> Unit,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
     onNavigateBack: () -> Unit,
@@ -34,7 +38,8 @@ fun SearchScreen(
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
-    SearchBar(query = uiState.query,
+    SearchBar(
+        query = uiState.query,
         onQueryChange = onQueryChange,
         onSearch = onSearch,
         active = true,
@@ -52,7 +57,11 @@ fun SearchScreen(
     ) {
         uiState.articles?.let {
             ArticleList(
-                articles = it.collectAsLazyPagingItems(), navigateToArticle = navigateToArticle
+                articles = it.collectAsLazyPagingItems(),
+                navigateToArticle = navigateToArticle,
+                onSaveArticle = onSaveArticle,
+                onDeleteArticle = onDeleteArticle,
+                savedArticleIds = savedArticleIds
             )
         }
     }
@@ -63,6 +72,13 @@ fun SearchScreen(
 @Composable
 fun PreviewSearchScreen() {
     NewsTheme {
-        SearchScreen(SearchUiState(), {}, {}, {}) {}
+        SearchScreen(SearchUiState(),
+            onSearch = {},
+            onSaveArticle = {},
+            onDeleteArticle = {},
+            navigateToArticle = {},
+            savedArticleIds = setOf(),
+            onNavigateBack = {},
+            onQueryChange = {})
     }
 }

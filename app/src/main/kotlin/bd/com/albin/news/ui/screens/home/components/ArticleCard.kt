@@ -1,10 +1,12 @@
 package bd.com.albin.news.ui.screens.home.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,8 +41,10 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import bd.com.albin.news.R
-import bd.com.albin.news.data.local.entities.Source
-import bd.com.albin.news.data.model.Article
+import bd.com.albin.news.data.local.entities.ArticleEntity
+import bd.com.albin.news.data.network.models.NetworkArticle
+import bd.com.albin.news.data.network.models.NetworkSource
+import bd.com.albin.news.data.network.models.asEntity
 import bd.com.albin.news.ui.common.composable.ErrorScreen
 import bd.com.albin.news.ui.common.composable.LoadingScreen
 import bd.com.albin.news.ui.common.ext.ensureHttpsUrl
@@ -52,7 +56,7 @@ import java.util.concurrent.TimeUnit
 
 @Composable
 fun PublishTime(
-    article: Article, modifier: Modifier = Modifier
+    article: ArticleEntity, modifier: Modifier = Modifier
 ) {
 
     var timeValue: Long = TimeUnit.MINUTES.convert(
@@ -73,13 +77,13 @@ fun PublishTime(
     Row(modifier) {
         Text(
             text = stringResource(R.string.publish_time, timeValue, timeUnit),
-            style = MaterialTheme.typography.labelMedium
+            style = MaterialTheme.typography.labelLarge
         )
     }
 }
 
 @Composable
-fun ArticleImage(article: Article, modifier: Modifier = Modifier) {
+fun ArticleImage(article: ArticleEntity, modifier: Modifier = Modifier) {
     AsyncImage(
         model = article.urlToImage?.ensureHttpsUrl(),
         contentDescription = null,
@@ -93,15 +97,18 @@ fun ArticleImage(article: Article, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ArticleTitle(article: Article, modifier: Modifier = Modifier) {
+fun ArticleTitle(article: ArticleEntity, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
-            text = article.source.name.uppercase(), style = TextStyle(
+            text = article.source.name.uppercase(),
+            style = TextStyle(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
                         MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary
                     )
-                )), fontWeight = FontWeight.Bold,
+                )
+            ),
+            fontWeight = FontWeight.Bold,
         )
         Text(
             text = article.title,
@@ -114,14 +121,10 @@ fun ArticleTitle(article: Article, modifier: Modifier = Modifier) {
 
 @Composable
 fun BookmarkButton(
-    isBookmarked: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    isBookmarked: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier
 ) {
     IconToggleButton(
-        checked = isBookmarked,
-        onCheckedChange = { onClick() },
-        modifier = modifier
+        checked = isBookmarked, onCheckedChange = { onClick() }, modifier = modifier
     ) {
         Icon(
             imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
@@ -132,13 +135,17 @@ fun BookmarkButton(
 
 @Composable
 fun ArticleCard(
-    article: Article,
+    article: ArticleEntity,
+    isSaved: Boolean,
+    onSaveArticle: (ArticleEntity) -> Unit,
+    onDeleteArticle: (ArticleEntity) -> Unit,
     navigateToArticle: (String) -> Unit,
+    modifier: Modifier=Modifier
 ) {
     Column(
         modifier = Modifier
             .clickable(onClick = { navigateToArticle(article.url) })
-            .padding(16.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp)
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ArticleTitle(article, modifier = Modifier.weight(1f))
@@ -151,7 +158,9 @@ fun ArticleCard(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             PublishTime(article)
-//            BookmarkButton(isBookmarked = false, onClick = { /*TODO*/ })
+            Spacer(modifier = Modifier.weight(1f))
+            BookmarkButton(isBookmarked = isSaved,
+                onClick = { if (isSaved) onDeleteArticle(article) else onSaveArticle(article) })
         }
     }
 }
@@ -191,10 +200,13 @@ fun ArticleListDivider() {
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun ArticleList(
-    articles: LazyPagingItems<Article>,
+    articles: LazyPagingItems<ArticleEntity>,
+    savedArticleIds: Set<String>,
+    onSaveArticle: (ArticleEntity) -> Unit,
+    onDeleteArticle: (ArticleEntity) -> Unit,
     navigateToArticle: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -215,7 +227,11 @@ fun ArticleList(
                 if (article != null) {
                     ArticleCard(
                         article = article,
+                        savedArticleIds.contains(article.urlId),
+                        onSaveArticle,
+                        onDeleteArticle,
                         navigateToArticle = navigateToArticle,
+                        Modifier.animateItemPlacement()
                     )
                     ArticleListDivider()
                 }
@@ -241,7 +257,7 @@ fun ArticleList(
 @Composable
 fun PreviewArticleImage() {
     NewsTheme {
-        ArticleImage(article = Article())
+        ArticleImage(article = NetworkArticle().asEntity())
     }
 }
 
@@ -249,12 +265,15 @@ fun PreviewArticleImage() {
 @Composable
 fun PreviewArticleCard() {
     NewsTheme {
-        ArticleCard(
-            article = Article(
-                Source("", "BBC News"),
-                title = "This a news title very long news title - sample news title",
-            )
-        ) {}
+        ArticleCard(article = NetworkArticle(
+            NetworkSource("", "BBC News"),
+            title = "This a news title very long news title - sample news title",
+        ).asEntity(),
+            onDeleteArticle = {},
+            onSaveArticle = {},
+            navigateToArticle = {},
+            isSaved = false
+        )
     }
 }
 

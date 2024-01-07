@@ -15,8 +15,8 @@ interface ArticleCacheDao {
     @Query("SELECT * FROM ArticleEntity WHERE title IS NOT \'[Removed]\' AND url_to_image IS NOT null ORDER BY published_at DESC")
     fun pagingSource(): PagingSource<Int, ArticleEntity>
 
-    @Query("SELECT * FROM ArticleEntity WHERE url = :url")
-    fun getArticle(url: String): ArticleEntity
+    @Query("SELECT * FROM ArticleEntity WHERE url_id = :urlId")
+    fun getArticle(urlId: String): ArticleEntity?
 
     @Query("SELECT * FROM ArticleEntity LIMIT 1")
     fun getAnyOneItem(): ArticleEntity?

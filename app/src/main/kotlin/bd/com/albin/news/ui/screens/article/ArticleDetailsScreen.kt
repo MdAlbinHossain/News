@@ -72,7 +72,6 @@ fun ArticleDetailsScreen(
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
             }
         }, actions = {
-
             IconButton(onClick = {
                 localContext.startActivity(
                     Intent.createChooser(

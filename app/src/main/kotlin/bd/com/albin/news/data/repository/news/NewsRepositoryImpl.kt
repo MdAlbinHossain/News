@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import bd.com.albin.news.data.local.cache.NewsCacheDatabase
 import bd.com.albin.news.data.local.entities.ArticleEntity
+import bd.com.albin.news.data.local.saved.SavedArticleDao
 import bd.com.albin.news.data.network.NewsApiService
 import bd.com.albin.news.data.network.NewsHeadlineRemoteMediator
 import bd.com.albin.news.data.network.NewsSearchPagingSource
@@ -16,6 +17,7 @@ import javax.inject.Inject
 class NewsRepositoryImpl @Inject constructor(
     private val newsApiService: NewsApiService,
     private val newsCacheDatabase: NewsCacheDatabase,
+    private val savedArticleDao: SavedArticleDao,
 ) : NewsRepository {
 
     private val newsCacheDao = newsCacheDatabase.articleCacheDao
@@ -30,9 +32,26 @@ class NewsRepositoryImpl @Inject constructor(
         }.flow
     }
 
+    override fun getSavedNews(): Flow<PagingData<ArticleEntity>> {
+        return Pager(
+            config = PagingConfig(pageSize = 100),
+        ) {
+            savedArticleDao.pagingSource()
+        }.flow
+    }
+
     override fun searchNews(query: String): Flow<PagingData<NetworkArticle>> {
         return Pager(config = PagingConfig(pageSize = 100), pagingSourceFactory = {
             NewsSearchPagingSource(query = query, newsApiService = newsApiService)
         }).flow
     }
+
+    override suspend fun getArticle(urlId: String): ArticleEntity =
+        newsCacheDao.getArticle(urlId) ?: savedArticleDao.getArticle(urlId)
+
+    override suspend fun saveArticle(article: ArticleEntity) = savedArticleDao.insert(article)
+
+    override fun deleteArticle(article: ArticleEntity) = savedArticleDao.deleteArticle(article)
+
+    override fun getArticleIds(): Flow<List<String>> = savedArticleDao.getArticleIds()
 }

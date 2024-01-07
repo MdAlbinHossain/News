@@ -5,8 +5,8 @@ import androidx.room.RoomDatabase
 import bd.com.albin.news.data.local.entities.ArticleEntity
 
 @Database(entities = [ArticleEntity::class], version = 1, exportSchema = false)
-abstract class SavedNewsDatabase : RoomDatabase() {
+abstract class SavedArticleDatabase : RoomDatabase() {
 
-    abstract val SavedArticleDao: SavedArticleDao
+    abstract val savedArticleDao: SavedArticleDao
 
 }

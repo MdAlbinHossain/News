@@ -3,6 +3,7 @@ package bd.com.albin.news.data.model
 import bd.com.albin.news.data.local.entities.Source
 
 data class Article(
+    val id: String="",
     val source: Source = Source(),
     val author: String? = "",
     val title: String = "",

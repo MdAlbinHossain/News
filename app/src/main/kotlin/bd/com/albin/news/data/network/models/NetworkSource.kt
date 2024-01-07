@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NetworkSource(
-    val id: String?,
-    val name: String,
+    val id: String?="",
+    val name: String="",
 )
 
 fun NetworkSource.asLocal() = Source(id = id, name = name)
