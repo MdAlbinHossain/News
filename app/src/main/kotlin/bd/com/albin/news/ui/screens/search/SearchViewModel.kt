@@ -8,9 +8,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
-import bd.com.albin.news.data.model.Article
+import bd.com.albin.news.data.local.entities.ArticleEntity
 import bd.com.albin.news.data.network.models.NetworkArticle
-import bd.com.albin.news.data.network.models.asExternalModel
+import bd.com.albin.news.data.network.models.asEntity
 import bd.com.albin.news.domain.news.GetNewsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -36,12 +36,12 @@ class SearchNewsViewModel @Inject constructor(private val getNewsUseCase: GetNew
         val articles = getNewsUseCase(
             query = query,
         ).map {
-            it.map(NetworkArticle::asExternalModel)
+            it.map(NetworkArticle::asEntity)
         }.cachedIn(viewModelScope)
         uiState = uiState.copy(articles = articles)
     }
 }
 
 data class SearchUiState(
-    val query: String = "", val articles: Flow<PagingData<Article>>? = null
+    val query: String = "", val articles: Flow<PagingData<ArticleEntity>>? = null
 )
