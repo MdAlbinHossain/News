@@ -1,4 +1,4 @@
-![Screenshots](./Screenshots/NewsApp.png)
+![Screenshots](./Screenshot.png)
 # **News App**
 
 **Stay informed with the latest news, right at your fingertips!**
