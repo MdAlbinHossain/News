@@ -1,12 +1,11 @@
-import org.jetbrains.kotlin.konan.properties.Properties
-import java.io.FileInputStream
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.maps.secrets)
 }
 
 android {
@@ -25,16 +24,6 @@ android {
             useSupportLibrary = true
         }
 
-
-        val keystorePropertiesFile = rootProject.file("keystore.properties")
-        val keystoreProperties = Properties()
-        keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-
-        listOf("API_KEY_0", "API_KEY_1", "API_KEY_2", "API_KEY_3", "API_KEY_4").onEach {
-            buildConfigField("String", it, keystoreProperties.getProperty(it, ""))
-        }
-
-        buildConfigField("String", "BASE_URL", keystoreProperties.getProperty("baseUrl", ""))
     }
 
     buildTypes {
@@ -43,6 +32,7 @@ android {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.named("debug").get()
         }
     }
     compileOptions {
@@ -56,14 +46,14 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
+secrets {
+    propertiesFileName = "secrets.properties"
 }
 
 dependencies {

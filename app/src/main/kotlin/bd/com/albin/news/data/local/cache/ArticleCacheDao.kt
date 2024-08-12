@@ -2,17 +2,16 @@ package bd.com.albin.news.data.local.cache
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Upsert
 import bd.com.albin.news.data.local.entities.ArticleEntity
 
 @Dao
 interface ArticleCacheDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun insertAll(articles: List<ArticleEntity>)
 
-    @Query("SELECT * FROM ArticleEntity WHERE title IS NOT \'[Removed]\' AND url_to_image IS NOT null ORDER BY published_at DESC")
+    @Query("SELECT * FROM ArticleEntity")
     fun pagingSource(): PagingSource<Int, ArticleEntity>
 
     @Query("SELECT * FROM ArticleEntity WHERE url_id = :urlId")
